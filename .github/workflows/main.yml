@@ -34,6 +34,7 @@ jobs:
           echo "BASE_URL_HEROKU=${{ secrets.BASE_URL_HEROKU }}" >> .env
           echo "GPT_API_KEY=${{ secrets.GPT_API_KEY }}" >> .env
           echo "DEEPGRAM_API_KEY=${{ secrets.DEEPGRAM_API_KEY }}" >> .env
+          echo "HEROKU_API_KEY=${{ secrets.HEROKU_API_KEY }}" >> .env
         working-directory: .
 
       - name: Build Docker image
