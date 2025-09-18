@@ -29,6 +29,7 @@ const register = async (req, res, next) => {
       sex,
     })
 
+    
     const paylaod = { id: newUser._id };
     const accessToken = jwt.sign(paylaod, SECRET_KEY, { expiresIn: "12h" });
     const refreshToken = jwt.sign(paylaod, REFRESH_SECRET_KEY, {
