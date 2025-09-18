@@ -24,25 +24,27 @@ const googleParams = {
 const googleCallback = async (
   req,
   profile,
+  accessToken,
+  refreshToken,
   done
 ) => {
   try {
-    const date = new Date();
+    const date = new Date()
     const today = `${date.getFullYear()}-${
       date.getMonth() + 1
-    }-${date.getDate()}`;
+    }-${date.getDate()}`
 
-    const { email, given_name, picture } = profile;
-    const user = await User.findOne({ email });
+    const { email, given_name, picture } = profile
+    const user = await User.findOne({ email })
     if (user) {
       await User.findOneAndUpdate(
         { email },
         { referer: req.session.referer },
         { new: true }
-      );
-      return done(null, user);
+      )
+      return done(null, user)
     }
-    const password = await bcrypt.hash(shortid.generate(), 10);
+    const password = await bcrypt.hash(shortid.generate(), 10)
     const newUser = await User.create({
       email: email,
       passwordHash: password,
@@ -50,12 +52,12 @@ const googleCallback = async (
       userAvatar: picture,
       dateCreate: today,
       referer: req.session.referer,
-    });
-    return done(null, newUser);
+    })
+    return done(null, newUser)
   } catch (error) {
-    done(error, false);
+    done(error, false)
   }
-};
+}
 
 const googleStrategy = new Strategy(googleParams, googleCallback);
 passport.use("google", googleStrategy);
