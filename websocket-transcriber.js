@@ -1,31 +1,19 @@
-const { Transcriber } = require('./helpers');
+const { Transcriber } = require('./helpers')
 
-const setupTranscriberHandlers = (socket) => {
-  const transcriber = new Transcriber();
+const setupTranscriberHandlers = (socket, io, clientId) => {
+  const transcriber = new Transcriber()
 
-  transcriber.on('transcriber-ready', () => {
-    socket.emit('transcriber-ready', 'Ready')
-  });
+  const emit = (event, payload) => {
+    if (clientId) io.to(clientId).emit(event, payload)
+    else socket.emit(event, payload)
+  }
 
-  transcriber.on('final', (transcript) => {
-    socket.emit('final', transcript)
-  });
-
-  transcriber.on('final-transleted', (transletedResponse) => {
-    socket.emit('final-transleted', transletedResponse)
-  });
-
-  transcriber.on('partial', (transcript) => {
-    socket.emit('partial', transcript)
-  });
-
-  transcriber.on('error', (error) => {
-    socket.emit('error', error)
-  });
-
-  transcriber.on('close', (data) => {
-    socket.emit('close', data)
-  });
+  transcriber.on('transcriber-ready', () => emit('transcriber-ready', 'Ready'))
+  transcriber.on('final', (t) => emit('final', t))
+  transcriber.on('final-transleted', (t) => emit('final-transleted', t))
+  transcriber.on('partial', (t) => emit('partial', t))
+  transcriber.on('error', (e) => emit('error', e))
+  transcriber.on('close', (d) => emit('close', d))
 
   socket.on('incoming-audio', async (data) => {
     if (!transcriber.deepgramSocket) {
@@ -33,19 +21,17 @@ const setupTranscriberHandlers = (socket) => {
         data.sampleRate,
         data.inputLanguage
       )
-      transcriber.send(data.audioData, data.targetLanguage)
-    } else {
-      transcriber.send(data.audioData, data.targetLanguage)
     }
-  });
+    transcriber.send(data.audioData, data.targetLanguage)
+  })
 
-  socket.on('pause-deepgram', (data) => {
-    transcriber.pauseTranscriptionStream(data)
-  });
+  socket.on('pause-deepgram', (flag) => {
+    transcriber.pauseTranscriptionStream(flag)
+  })
 
-  socket.on('diconnect-deepgram', () => {
+  socket.on('disconnect-deepgram', () => {
     transcriber.endTranscriptionStream()
-  });
-};
+  })
+}
 
-module.exports = { setupTranscriberHandlers };
+module.exports = { setupTranscriberHandlers }
