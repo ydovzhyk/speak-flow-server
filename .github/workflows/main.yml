@@ -71,9 +71,6 @@ jobs:
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Install Heroku CLI
-        run: curl https://cli-assets.heroku.com/install.sh | sh
-
       # (необов'язково, але корисно перевірити, що ключ валідний)
       - name: Heroku auth check
         env:
@@ -86,6 +83,12 @@ jobs:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku container:login
 
+      # ⬇️ ВАЖЛИВО: перемкнути стек на container
+      - name: Set Heroku stack to container
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku stack:set container -a speak-flow-server
+
       - name: Push to Heroku Container Registry
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -95,3 +98,9 @@ jobs:
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku container:release web -a speak-flow-server
+
+      # (за потреби) увімкнути дінку, якщо 0
+      - name: Ensure web dyno is running
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: heroku ps:scale web=1 -a speak-flow-server
