@@ -1,25 +1,21 @@
-const mongoose = require("mongoose");
-const http = require("http");
-const { Server } = require("socket.io");
-const app = require("./app");
-const initializeWebSocket = require("./websocket.js");
+const mongoose = require('mongoose')
+const http = require('http')
+const { Server } = require('socket.io')
+const app = require('./app')
+const initializeWebSocket = require('./websocket.js')
 
-mongoose.set("strictQuery", false);
-require("dotenv").config();
+mongoose.set('strictQuery', false)
+require('dotenv').config()
 
-const { DB_HOST, PORT = 4000 } = process.env;
+const { DB_HOST, PORT = 4000 } = process.env
 
-// Підключення до MongoDB
 mongoose
   .connect(DB_HOST)
   .then(() => {
-    // eslint-disable-next-line no-console
-    console.log('Database connection successful')
+    console.log('Database connection successful') // eslint-disable-line
 
-    // Створення HTTP-сервера
     const server = http.createServer(app)
 
-    // Ініціалізація WebSocket-сервера
     const io = new Server(server, {
       cors: {
         origin: '*',
@@ -27,17 +23,13 @@ mongoose
       },
     })
 
-    // Ініціалізація WebSocket функціоналу
     initializeWebSocket(io)
 
-    // Запуск сервера
-    server.listen(PORT, () => {
-      // eslint-disable-next-line no-console
-      console.log(`Server listening at http://localhost:${PORT}`)
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server listening on port ${PORT}`) // eslint-disable-line
     })
   })
   .catch((error) => {
-    // eslint-disable-next-line no-console
-    console.log(error.message)
+    console.log(error.message) // eslint-disable-line
     process.exit(1)
-  });
+  })
