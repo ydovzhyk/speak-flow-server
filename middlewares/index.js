@@ -3,7 +3,6 @@ const validate = require("./validate");
 const isValidId = require("./isValidId");
 const authorize = require("./authorize");
 const authenticateRefresh = require("./authenticateRefresh");
-const uploadFiles = require("./uploadFiles");
 const passport = require("./google-auth");
 
 module.exports = {
@@ -12,6 +11,5 @@ module.exports = {
   validate,
   isValidId,
   authenticateRefresh,
-  uploadFiles,
   passport,
 };
