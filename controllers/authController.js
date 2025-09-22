@@ -86,24 +86,49 @@ const login = async (req, res, next) => {
   }
 };
 
+// const refresh = async (req, res, next) => {
+//   try {
+//     const user = req.user;
+//     await Session.deleteMany({ uid: req.user._id });
+//     const paylaod = { id: user._id };
+//     const newSession = await Session.create({ uid: user._id });
+//     const newAccessToken = jwt.sign(paylaod, SECRET_KEY, { expiresIn: "12h" });
+//     const newRefreshToken = jwt.sign(paylaod, REFRESH_SECRET_KEY, {
+//       expiresIn: "24h",
+//     });
+
+//     return res
+//       .status(200)
+//       .send({ newAccessToken, newRefreshToken, sid: newSession._id });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const refresh = async (req, res, next) => {
   try {
-    const user = req.user;
-    await Session.deleteMany({ uid: req.user._id });
-    const paylaod = { id: user._id };
-    const newSession = await Session.create({ uid: user._id });
-    const newAccessToken = jwt.sign(paylaod, SECRET_KEY, { expiresIn: "12h" });
-    const newRefreshToken = jwt.sign(paylaod, REFRESH_SECRET_KEY, {
-      expiresIn: "24h",
-    });
+    const user = req.user
 
-    return res
-      .status(200)
-      .send({ newAccessToken, newRefreshToken, sid: newSession._id });
+    await Session.deleteMany({ uid: user._id })
+
+    const newSession = await Session.create({ uid: user._id })
+
+    const payload = { id: user._id.toString() }
+    const newAccessToken = jwt.sign(payload, SECRET_KEY, { expiresIn: '12h' })
+    const newRefreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {
+      expiresIn: '24h',
+    })
+
+    return res.status(200).json({
+      code: 'OK',
+      newAccessToken,
+      newRefreshToken,
+      sid: newSession._id,
+    })
   } catch (error) {
-    next(error);
+    next(error)
   }
-};
+}
 
 const logout = async (req, res, next) => {
   try {

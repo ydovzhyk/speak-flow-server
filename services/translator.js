@@ -44,6 +44,7 @@ ${JSON.stringify(styleProfile)}`
 }
 
 async function translateOne(sentence, targetLang, styleProfile) {
+  // console.log('Translating:', { sentence, targetLang, styleProfile }) // eslint-disable-line
   const r = await openai.chat.completions.create({
     model: FAST_MODEL,
     temperature: 0.2,
