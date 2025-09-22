@@ -108,9 +108,7 @@ const login = async (req, res, next) => {
 const refresh = async (req, res, next) => {
   try {
     const user = req.user
-
     await Session.deleteMany({ uid: user._id })
-
     const newSession = await Session.create({ uid: user._id })
 
     const payload = { id: user._id.toString() }
