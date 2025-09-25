@@ -12,7 +12,7 @@ const { DB_HOST, PORT = 4000 } = process.env
 mongoose
   .connect(DB_HOST)
   .then(() => {
-    console.log('Database connection successful') // eslint-disable-line
+    console.log('Database connection successful')
 
     const server = http.createServer(app)
 
@@ -26,10 +26,10 @@ mongoose
     initializeWebSocket(io)
 
     server.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server listening on port ${PORT}`) // eslint-disable-line
+      console.log(`Server listening on port ${PORT}`)
     })
   })
   .catch((error) => {
-    console.log(error.message) // eslint-disable-line
+    console.log(error.message)
     process.exit(1)
   })

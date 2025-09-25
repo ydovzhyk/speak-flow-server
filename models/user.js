@@ -31,6 +31,15 @@ const userSchema = new Schema(
       enum: ['male', 'female', ''],
       default: '',
     },
+    usage: {
+      totalRecordMs: { type: Number, default: 0 },
+      lastSession: {
+        startedAt: { type: Date, default: null },
+        endedAt: { type: Date, default: null },
+        durationMs: { type: Number, default: 0 },
+      },
+    },
+    clientKey: { type: String, index: true, unique: true, sparse: true },
   },
   { minimize: false, timestamps: true }
 )
