@@ -1,8 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const mongoose = require('mongoose')
 const { User } = require("../models/user");
 const { Session } = require("../models/session");
+const { Records } = require('../models/records');
 const { SECRET_KEY, REFRESH_SECRET_KEY } = process.env;
 const { RequestError } = require("../helpers");
 
@@ -86,25 +87,6 @@ const login = async (req, res, next) => {
   }
 };
 
-// const refresh = async (req, res, next) => {
-//   try {
-//     const user = req.user;
-//     await Session.deleteMany({ uid: req.user._id });
-//     const paylaod = { id: user._id };
-//     const newSession = await Session.create({ uid: user._id });
-//     const newAccessToken = jwt.sign(paylaod, SECRET_KEY, { expiresIn: "12h" });
-//     const newRefreshToken = jwt.sign(paylaod, REFRESH_SECRET_KEY, {
-//       expiresIn: "24h",
-//     });
-
-//     return res
-//       .status(200)
-//       .send({ newAccessToken, newRefreshToken, sid: newSession._id });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 const refresh = async (req, res, next) => {
   try {
     const user = req.user
@@ -141,17 +123,33 @@ const logout = async (req, res, next) => {
 }
 
 const deleteUserController = async (req, res, next) => {
-  try {
-    const { userId } = req.params;
-    await User.findOneAndDelete({ _id: userId });
-    const currentSession = req.session;
-    await Session.deleteOne({ _id: currentSession._id });
+  const { userId } = req.params
 
-    res.status(200).json({ message: "user deleted successfully" });
+  try {
+    const session = await mongoose.startSession()
+    try {
+      await session.withTransaction(async () => {
+        await Promise.all([
+          Records.deleteMany({ owner: userId }).session(session),
+          Session.deleteMany({ uid: userId }).session(session),
+          User.deleteOne({ _id: userId }).session(session),
+        ])
+      })
+      session.endSession()
+      return res.status(204).end()
+    } catch (txErr) {
+      session.endSession()
+      await Promise.all([
+        Records.deleteMany({ owner: userId }),
+        Session.deleteMany({ uid: userId }),
+        User.deleteOne({ _id: userId }),
+      ])
+      return res.status(204).end()
+    }
   } catch (error) {
-    next(error);
+    return next(error)
   }
-};
+}
 
 const getUserController = async (req, res, next) => {
   try {
