@@ -130,13 +130,15 @@ const refresh = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const user = req.user;
-    await Session.deleteMany({ uid: user._id });
-    return res.status(204).json({ message: "logout success" });
+    const user = req.user
+    if (user?._id) {
+      await Session.deleteMany({ uid: user._id })
+    }
+    res.status(204).end()
   } catch (error) {
-    return next(RequestError(404, "Session Not found"));
+    next(error)
   }
-};
+}
 
 const deleteUserController = async (req, res, next) => {
   try {
